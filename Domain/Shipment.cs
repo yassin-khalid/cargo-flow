@@ -13,6 +13,8 @@ public class Shipment
     public int WeightTypeId { get; set; }
     public WeightType WeightType { get; set; }
     public int ShipmentStatusId { get; set; }
-    public ShipmentStatus Status { get; set; }
+    public ShipmentStatus ShipmentStatus { get; set; }
     public List<Offer> Offers { get; set; }
+    public int WinningOfferId { get; set; }
+    public Offer WinningOffer { get; set; }
 }

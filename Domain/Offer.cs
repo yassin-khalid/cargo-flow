@@ -9,5 +9,6 @@ public class Offer
     public Company Company { get; set; }
     public DateTime SubmittedDate { get; set; }
     public decimal Price { get; set; }
-    public OfferType Type { get; set; }
+    public int OfferStateId { get; set; }
+    public OfferState OfferState { get; set; }
 }

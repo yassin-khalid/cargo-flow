@@ -8,4 +8,8 @@ public class Vehicle
     public DateOnly InspectionIdExpiryDate { get; set; }
     public DateOnly InsuranceIdExpiryDate { get; set; }
     public bool IsAvailable { get; set; }
+    public int CompanyId { get; set; }
+    public Company Company { get; set; }
+    public decimal MaxWeight { get; set; }
+    public int WeightTypeId { get; set; }
 }
