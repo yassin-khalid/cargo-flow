@@ -7,4 +7,5 @@ public class Vehicle
     public string InsuranceId { get; set; }
     public DateOnly InspectionIdExpiryDate { get; set; }
     public DateOnly InsuranceIdExpiryDate { get; set; }
+    public bool IsAvailable { get; set; }
 }
