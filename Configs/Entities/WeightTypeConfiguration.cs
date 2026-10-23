@@ -14,5 +14,6 @@ public class WeightTypeConfiguration : IEntityTypeConfiguration<WeightType>
             new() { Id = 2, Name = "Ton (t)" }
         };
         builder.HasData(weightTypes);
+        builder.Property(w => w.Name).HasMaxLength(40).IsRequired();
     }
 }

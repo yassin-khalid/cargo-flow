@@ -8,8 +8,6 @@ public class ShipmentStatusHistoryConfiguration : IEntityTypeConfiguration<Shipm
 {
     public void Configure(EntityTypeBuilder<ShipmentStatusHistory> builder)
     {
-        builder.HasIndex(h => new { h.ShipmentId, h.ShipmentStatusId }).IsUnique();
-
         builder
             .HasOne(h => h.Shipment)
             .WithMany(s => s.ShipmentStatusHistories)
