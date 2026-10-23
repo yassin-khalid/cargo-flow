@@ -18,25 +18,25 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
             .HasOne(s => s.WinningOffer)
             .WithOne()
             .HasForeignKey<Shipment>(s => s.WinningOfferId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne(s => s.Customer)
             .WithMany(c => c.Shipments)
             .HasForeignKey(s => s.CustomerId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne(s => s.Pickup)
             .WithMany(a => a.PickupShipments)
             .HasForeignKey(s => s.PickupId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne(s => s.Destination)
             .WithMany(a => a.DestinationShipments)
             .HasForeignKey(s => s.DestinationId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Restrict);
 
     }
 }

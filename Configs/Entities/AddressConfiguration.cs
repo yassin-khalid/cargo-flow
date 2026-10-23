@@ -12,12 +12,12 @@ public class AddressConfiguration : IEntityTypeConfiguration<Address>
             .HasMany(a => a.DestinationShipments)
             .WithOne(s => s.Destination)
             .HasForeignKey(s => s.DestinationId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasMany(a => a.PickupShipments)
             .WithOne(s => s.Pickup)
             .HasForeignKey(s => s.PickupId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

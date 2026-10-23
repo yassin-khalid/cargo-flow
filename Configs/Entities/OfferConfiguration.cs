@@ -12,12 +12,12 @@ public class OfferConfiguration : IEntityTypeConfiguration<Offer>
             .HasOne(o => o.Shipment)
             .WithMany(s => s.Offers)
             .HasForeignKey(o => o.ShipmentId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne(o => o.Company)
             .WithMany(c => c.Offers)
             .HasForeignKey(o => o.CompanyId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

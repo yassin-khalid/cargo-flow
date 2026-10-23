@@ -15,5 +15,11 @@ public class WeightTypeConfiguration : IEntityTypeConfiguration<WeightType>
         };
         builder.HasData(weightTypes);
         builder.Property(w => w.Name).HasMaxLength(40).IsRequired();
+
+        builder
+            .HasMany(w => w.Shipments)
+            .WithOne(s => s.WeightType)
+            .HasForeignKey(s => s.WeightTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

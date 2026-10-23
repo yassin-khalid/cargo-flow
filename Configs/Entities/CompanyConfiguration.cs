@@ -18,13 +18,13 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
             .HasMany(c => c.Drivers)
             .WithOne(d => d.Company)
             .HasForeignKey(d => d.CompanyId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasMany(c => c.Vehicles)
             .WithOne(v => v.Company)
             .HasForeignKey(v => v.CompanyId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(c => c.Name).IsUnique();
         builder.HasIndex(c => c.TaxID).IsUnique();

@@ -24,6 +24,6 @@ public class OfferStateConfiguration : IEntityTypeConfiguration<OfferState>
             .HasMany(s => s.Offers)
             .WithOne(o => o.OfferState)
             .HasForeignKey(o => o.OfferStateId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
