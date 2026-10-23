@@ -26,6 +26,8 @@ public class CargoFlowDbContext(DbContextOptions<CargoFlowDbContext> options) : 
         modelBuilder.ApplyConfiguration(new OfferConfiguration());
         modelBuilder.ApplyConfiguration(new OfferStateConfiguration());
         modelBuilder.ApplyConfiguration(new ShipmentConfiguration());
+        modelBuilder.ApplyConfiguration(new ShipmentStatusConfiguration());
         modelBuilder.ApplyConfiguration(new ShipmentStatusHistoryConfiguration());
+        modelBuilder.ApplyConfiguration(new WeightTypeConfiguration());
     }
 }

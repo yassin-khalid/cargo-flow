@@ -12,4 +12,5 @@ public class Vehicle
     public Company Company { get; set; }
     public decimal MaxWeight { get; set; }
     public int WeightTypeId { get; set; }
+    public WeightType WeightType { get; set; }
 }
