@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("3d155b7a-2c57-418f-9db8-288ced5279a2")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("CargoFlow")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8b329755aeef7bb086ccc170c0f661dcaa549446")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b8e0150704ef875107b95d2a1e040b5ae0f29202")]
 [assembly: System.Reflection.AssemblyProductAttribute("CargoFlow")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CargoFlow")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

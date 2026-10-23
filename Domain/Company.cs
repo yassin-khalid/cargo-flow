@@ -8,4 +8,5 @@ public class Company
     public string TaxID { get; set; }
     public List<Driver> Drivers { get; set; }
     public List<Offer> Offers { get; set; }
+    public List<Vehicle> Vehicles { get; set; }
 }

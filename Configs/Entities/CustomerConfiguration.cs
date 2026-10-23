@@ -1,0 +1,19 @@
+using CargoFlow.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace CargoFlow.Configs.Entities;
+
+public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
+{
+    public void Configure(EntityTypeBuilder<Customer> builder)
+    {
+        builder
+            .HasMany(c => c.Shipments)
+            .WithOne(s => s.Customer)
+            .HasForeignKey(s => s.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(c => c.Name).HasMaxLength(40).IsRequired();
+    }
+}

@@ -1,3 +1,4 @@
+using CargoFlow.Configs.Entities;
 using CargoFlow.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,4 +17,15 @@ public class CargoFlowDbContext(DbContextOptions<CargoFlowDbContext> options) : 
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<WeightType> WeightTypes => Set<WeightType>();
     public DbSet<ShipmentStatusHistory> ShipmentStatusHistories => Set<ShipmentStatusHistory>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new AddressConfiguration());
+        modelBuilder.ApplyConfiguration(new CompanyConfiguration());
+        modelBuilder.ApplyConfiguration(new CustomerConfiguration());
+        modelBuilder.ApplyConfiguration(new OfferConfiguration());
+        modelBuilder.ApplyConfiguration(new OfferStateConfiguration());
+        modelBuilder.ApplyConfiguration(new ShipmentConfiguration());
+        modelBuilder.ApplyConfiguration(new ShipmentStatusHistoryConfiguration());
+    }
 }

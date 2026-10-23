@@ -15,6 +15,7 @@ public class Shipment
     public int ShipmentStatusId { get; set; }
     public ShipmentStatus ShipmentStatus { get; set; }
     public List<Offer> Offers { get; set; }
-    public int WinningOfferId { get; set; }
-    public Offer WinningOffer { get; set; }
+    public int? WinningOfferId { get; set; }
+    public Offer? WinningOffer { get; set; }
+    public List<ShipmentStatusHistory> ShipmentStatusHistories { get; set; }
 }
