@@ -6,6 +6,7 @@ public class OfferState
 {
     public int Id { get; set; }
     [Required]
+    [MaxLength(20, ErrorMessage = "Name must have 20 characters maximum")]
     public string Name { get; set; }
     public List<Offer> Offers { get; set; } = [];
 }

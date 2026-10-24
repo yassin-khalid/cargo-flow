@@ -8,6 +8,8 @@ public class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
 {
     public void Configure(EntityTypeBuilder<Vehicle> builder)
     {
+        builder.Property(v => v.InspectionId).HasMaxLength(20).IsRequired();
+        builder.Property(v => v.InsuranceId).HasMaxLength(20).IsRequired();
         builder.HasIndex(v => v.InspectionId).IsUnique();
         builder.HasIndex(v => v.InsuranceId).IsUnique();
         builder.ToTable(v => v.HasCheckConstraint("Ck_Vehicle_MaxWeight_Min", "[MaxWeight] > 0")); 

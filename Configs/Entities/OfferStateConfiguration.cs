@@ -20,5 +20,7 @@ public class OfferStateConfiguration : IEntityTypeConfiguration<OfferState>
 
         builder.HasData(offerStates);
         builder.HasIndex(o => o.Name).IsUnique();
+
+        builder.Property(o => o.Name).HasMaxLength(20).IsRequired();
     }
 }

@@ -22,5 +22,7 @@ public class ShipmentStatusConfiguration : IEntityTypeConfiguration<ShipmentStat
 
         builder.HasData(shipmentStatuses);
         builder.HasIndex(s => s.Name).IsUnique();
+
+        builder.Property(s => s.Name).HasMaxLength(20).IsRequired();
     }
 }
