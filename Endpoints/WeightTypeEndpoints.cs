@@ -24,7 +24,9 @@ public static class WeightTypeEndpoints
 
    private static async Task<Results<Ok<WeightTypeDto>, NotFound>> GetWeightType(CargoFlowDbContext db, int id)
    {
-      return await db.WeightTypes.FirstOrDefaultAsync(w => w.Id == id) switch
+      return await db.WeightTypes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(w => w.Id == id) switch
       {
          { } weightType => TypedResults.Ok(new WeightTypeDto(weightType.Id, weightType.Name)),
          _ => TypedResults.NotFound()
