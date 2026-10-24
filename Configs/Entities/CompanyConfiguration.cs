@@ -8,24 +8,6 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
 {
     public void Configure(EntityTypeBuilder<Company> builder)
     {
-        builder
-            .HasMany(c => c.Offers)
-            .WithOne(o => o.Company)
-            .HasForeignKey(o => o.CompanyId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder
-            .HasMany(c => c.Drivers)
-            .WithOne(d => d.Company)
-            .HasForeignKey(d => d.CompanyId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder
-            .HasMany(c => c.Vehicles)
-            .WithOne(v => v.Company)
-            .HasForeignKey(v => v.CompanyId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.HasIndex(c => c.Name).IsUnique();
         builder.HasIndex(c => c.TaxID).IsUnique();
 

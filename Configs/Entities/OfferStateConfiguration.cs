@@ -19,11 +19,5 @@ public class OfferStateConfiguration : IEntityTypeConfiguration<OfferState>
         };
 
         builder.HasData(offerStates);
-        
-        builder
-            .HasMany(s => s.Offers)
-            .WithOne(o => o.OfferState)
-            .HasForeignKey(o => o.OfferStateId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

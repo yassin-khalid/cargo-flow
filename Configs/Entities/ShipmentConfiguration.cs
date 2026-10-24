@@ -8,16 +8,13 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
 {
     public void Configure(EntityTypeBuilder<Shipment> builder)
     {
-        builder
-            .HasMany(s => s.Offers)
-            .WithOne(o => o.Shipment)
-            .HasForeignKey(o => o.ShipmentId)
-            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(s => s.WinningOffer)
-            .WithOne()
-            .HasForeignKey<Shipment>(s => s.WinningOfferId)
+            .WithMany()
+            .HasForeignKey(s => new {s.Id, s.WinningOfferId})
+            .HasPrincipalKey(o => new {o.ShipmentId, o.Id})
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
@@ -36,6 +33,18 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
             .HasOne(s => s.Destination)
             .WithMany(a => a.DestinationShipments)
             .HasForeignKey(s => s.DestinationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(s => s.WeightType)
+            .WithMany(w => w.Shipments)
+            .HasForeignKey(s => s.WeightTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(s => s.ShipmentStatus)
+            .WithMany(t => t.Shipments)
+            .HasForeignKey(s => s.ShipmentStatusId)
             .OnDelete(DeleteBehavior.Restrict);
 
     }
