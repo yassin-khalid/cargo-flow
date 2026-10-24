@@ -14,13 +14,13 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
             .HasPrecision(18, 2)
             .IsRequired();
 
-        builder.ToTable(s => s.HasCheckConstraint("Ck_Shipment_Weight_Min", "[Weight] >= 0"));
+        builder.ToTable(s => s.HasCheckConstraint("Ck_Shipment_Weight_Min", "[Weight] > 0"));
         
         builder
             .HasOne(s => s.WinningOffer)
             .WithMany()
-            .HasForeignKey(s => new {s.Id, s.WinningOfferId})
-            .HasPrincipalKey(o => new {o.ShipmentId, o.Id})
+            .HasForeignKey(s => new {s.WinningOfferId, s.Id})
+            .HasPrincipalKey(o => new {o.Id, o.ShipmentId})
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 

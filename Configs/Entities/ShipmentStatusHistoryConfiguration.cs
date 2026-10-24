@@ -9,6 +9,11 @@ public class ShipmentStatusHistoryConfiguration : IEntityTypeConfiguration<Shipm
     public void Configure(EntityTypeBuilder<ShipmentStatusHistory> builder)
     {
         builder
+            .Property(h => h.DateTime)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GetUTCDATE()");
+        
+        builder
             .HasOne(h => h.Shipment)
             .WithMany(s => s.ShipmentStatusHistories)
             .HasForeignKey(h => h.ShipmentId)
@@ -18,6 +23,6 @@ public class ShipmentStatusHistoryConfiguration : IEntityTypeConfiguration<Shipm
             .HasOne(h => h.ShipmentStatus)
             .WithMany(s => s.ShipmentStatusHistories)
             .HasForeignKey(h => h.ShipmentStatusId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

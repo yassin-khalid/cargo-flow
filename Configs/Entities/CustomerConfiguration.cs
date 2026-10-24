@@ -9,6 +9,6 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
     public void Configure(EntityTypeBuilder<Customer> builder)
     {
         builder.Property(c => c.Name).HasMaxLength(40).IsRequired();
-        builder.HasIndex(c => c.Name).IsUnique();
+        builder.HasIndex(c => c.NationalId).IsUnique();
     }
 }

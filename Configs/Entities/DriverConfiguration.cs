@@ -14,6 +14,6 @@ public class DriverConfiguration: IEntityTypeConfiguration<Driver>
             .HasForeignKey(d => d.CompanyId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasIndex(d => d.Name).IsUnique();
+        builder.HasIndex(d => d.Phone).IsUnique();
     }
 }

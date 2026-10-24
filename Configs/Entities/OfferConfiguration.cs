@@ -15,7 +15,7 @@ public class OfferConfiguration : IEntityTypeConfiguration<Offer>
             .IsRequired();
 
         builder
-            .ToTable(o => o.HasCheckConstraint("Ck_Offer_Price_Min", "[Price] >= 0"));
+            .ToTable(o => o.HasCheckConstraint("Ck_Offer_Price_Min", "[Price] > 0"));
         
         builder
             .HasOne(o => o.Shipment)

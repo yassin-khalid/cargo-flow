@@ -7,5 +7,5 @@ public class ShipmentStatusHistory
     public ShipmentStatus ShipmentStatus { get; set; }
     public int ShipmentId { get; set; }
     public Shipment Shipment { get; set; }
-    public DateTime DateTime { get; set; }
+    public DateTime DateTime { get; set; } = DateTime.UtcNow;
 }
