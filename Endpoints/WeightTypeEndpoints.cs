@@ -26,9 +26,10 @@ public static class WeightTypeEndpoints
    {
       return await db.WeightTypes
             .AsNoTracking()
-            .FirstOrDefaultAsync(w => w.Id == id) switch
+            .Select(w => new WeightTypeDto(w.Id, w.Name))
+            .FirstOrDefaultAsync(w => w.Id == id)switch
       {
-         { } weightType => TypedResults.Ok(new WeightTypeDto(weightType.Id, weightType.Name)),
+         { } weightType => TypedResults.Ok(weightType),
          _ => TypedResults.NotFound()
       };
    }
