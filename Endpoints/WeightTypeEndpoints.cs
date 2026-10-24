@@ -16,7 +16,7 @@ public static class WeightTypeEndpoints
 
    private static async Task<Ok<List<WeightTypeDto>>> GetWeightTypes(CargoFlowDbContext db)
    {
-      return TypedResults.Ok(await db.WeightTypes.Select(w =>  new WeightTypeDto()
+      return TypedResults.Ok(await db.WeightTypes.AsNoTracking().Select(w =>  new WeightTypeDto()
       {
          Id = w.Id,
          Name = w.Name
