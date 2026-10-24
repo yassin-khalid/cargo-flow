@@ -1,5 +1,4 @@
 using CargoFlow.Data;
-using CargoFlow.Domain;
 using CargoFlow.Dtos;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -11,15 +10,24 @@ public static class WeightTypeEndpoints
    public static RouteGroupBuilder MapWeightTypeEndpoints(this RouteGroupBuilder group)
    {
       group.MapGet("/", GetWeightTypes);
+      group.MapGet("/{id:int}", GetWeightType);
       return group;
    }
 
    private static async Task<Ok<List<WeightTypeDto>>> GetWeightTypes(CargoFlowDbContext db)
    {
-      return TypedResults.Ok(await db.WeightTypes.AsNoTracking().Select(w =>  new WeightTypeDto()
+      return TypedResults.Ok(await db.WeightTypes
+         .AsNoTracking()
+         .Select(w => new WeightTypeDto(w.Id, w.Name))
+         .ToListAsync());
+   }
+
+   private static async Task<Results<Ok<WeightTypeDto>, NotFound>> GetWeightType(CargoFlowDbContext db, int id)
+   {
+      return await db.WeightTypes.FirstOrDefaultAsync(w => w.Id == id) switch
       {
-         Id = w.Id,
-         Name = w.Name
-      }).ToListAsync());
+         { } weightType => TypedResults.Ok(new WeightTypeDto(weightType.Id, weightType.Name)),
+         _ => TypedResults.NotFound()
+      };
    }
 }

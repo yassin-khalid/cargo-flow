@@ -1,6 +1,9 @@
 @CargoFlow_HostAddress = http://localhost:5226
 
-GET {{CargoFlow_HostAddress}}/weight-types/
+GET {{CargoFlow_HostAddress}}/api/weight-types/
 Accept: application/json
 
+###
+
+GET {{CargoFlow_HostAddress}}/api/weight-types/7
 ###

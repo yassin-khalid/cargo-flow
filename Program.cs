@@ -13,7 +13,9 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
-app
+var group = app.MapGroup("/api");
+
+group
     .MapGroup("/weight-types")
     .MapWeightTypeEndpoints();
 
