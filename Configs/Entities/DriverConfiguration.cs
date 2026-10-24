@@ -13,5 +13,7 @@ public class DriverConfiguration: IEntityTypeConfiguration<Driver>
             .WithMany(c => c.Drivers)
             .HasForeignKey(d => d.CompanyId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasIndex(d => d.Name).IsUnique();
     }
 }

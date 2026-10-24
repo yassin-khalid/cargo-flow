@@ -21,5 +21,6 @@ public class ShipmentStatusConfiguration : IEntityTypeConfiguration<ShipmentStat
         };
 
         builder.HasData(shipmentStatuses);
+        builder.HasIndex(s => s.Name).IsUnique();
     }
 }

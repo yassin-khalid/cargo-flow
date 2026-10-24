@@ -15,6 +15,7 @@ public class WeightTypeConfiguration : IEntityTypeConfiguration<WeightType>
         };
         builder.HasData(weightTypes);
         builder.Property(w => w.Name).HasMaxLength(40).IsRequired();
+        builder.HasIndex(w => w.Name).IsUnique();
 
     }
 }

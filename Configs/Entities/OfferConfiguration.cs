@@ -9,6 +9,13 @@ public class OfferConfiguration : IEntityTypeConfiguration<Offer>
     public void Configure(EntityTypeBuilder<Offer> builder)
     {
         builder.HasAlternateKey(o => new { o.Id, o.ShipmentId });
+        builder
+            .Property(o => o.Price)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        builder
+            .ToTable(o => o.HasCheckConstraint("Ck_Offer_Price_Min", "[Price] >= 0"));
         
         builder
             .HasOne(o => o.Shipment)

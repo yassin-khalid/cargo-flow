@@ -19,5 +19,6 @@ public class OfferStateConfiguration : IEntityTypeConfiguration<OfferState>
         };
 
         builder.HasData(offerStates);
+        builder.HasIndex(o => o.Name).IsUnique();
     }
 }
