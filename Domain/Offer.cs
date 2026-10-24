@@ -11,7 +11,7 @@ public class Offer
     public Company Company { get; set; }
     public DateTime SubmittedDate { get; set; }
     [Required]
-    [Range(1, double.MaxValue, ErrorMessage = "Price must be greater than or equal to zero")]
+    [Range(1, double.MaxValue, ErrorMessage = "Price must be greater than zero")]
     public decimal Price { get; set; }
     public int OfferStateId { get; set; }
     public OfferState OfferState { get; set; }

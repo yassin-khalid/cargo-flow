@@ -12,7 +12,7 @@ public class Shipment
     public int DestinationId { get; set; }
     public Address Destination { get; set; }
     [Required]
-    [Range(1, double.MaxValue, ErrorMessage = "Weight must be greater than or equals to zero")]
+    [Range(1, double.MaxValue, ErrorMessage = "Weight must be greater than zero")]
     public decimal Weight { get; set; }
     public int WeightTypeId { get; set; }
     public WeightType WeightType { get; set; }

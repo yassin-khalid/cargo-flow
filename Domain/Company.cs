@@ -12,7 +12,7 @@ public class Company
     [EmailAddress]
     public string Email { get; set; }
     [Required]
-    [MaxLength(10, ErrorMessage = "TaxId must have maximum 10 characters")]
+    [MaxLength(15, ErrorMessage = "TaxId must have maximum 15 characters")]
     public string TaxID { get; set; }
 
     public List<Driver> Drivers { get; set; } = [];

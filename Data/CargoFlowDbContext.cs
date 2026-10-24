@@ -20,6 +20,7 @@ public class CargoFlowDbContext(DbContextOptions<CargoFlowDbContext> options) : 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new AddressConfiguration());
         modelBuilder.ApplyConfiguration(new CompanyConfiguration());
         modelBuilder.ApplyConfiguration(new CustomerConfiguration());
         modelBuilder.ApplyConfiguration(new DriverConfiguration());
