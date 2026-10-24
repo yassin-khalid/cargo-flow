@@ -1,6 +1,6 @@
 @CargoFlow_HostAddress = http://localhost:5226
 
-GET {{CargoFlow_HostAddress}}/weatherforecast/
+GET {{CargoFlow_HostAddress}}/weight-types/
 Accept: application/json
 
 ###

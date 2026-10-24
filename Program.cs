@@ -1,4 +1,5 @@
 using CargoFlow.Data;
+using CargoFlow.Endpoints;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder();
@@ -11,5 +12,9 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
+
+app
+    .MapGroup("/weight-types")
+    .MapWeightTypeEndpoints();
 
 app.Run();
