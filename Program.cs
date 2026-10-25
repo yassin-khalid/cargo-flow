@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CargoFlow.Data;
 using CargoFlow.Endpoints;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder();
 builder.Services.AddDbContext<CargoFlowDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CargoFlow")));
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower);
+builder.Services.AddValidation();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -18,5 +22,8 @@ var group = app.MapGroup("/api");
 group
     .MapGroup("/weight-types")
     .MapWeightTypeEndpoints();
+group
+    .MapGroup("/customers")
+    .MapCustomerEndpoints();
 
 app.Run();

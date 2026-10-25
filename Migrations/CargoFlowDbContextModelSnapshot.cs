@@ -38,7 +38,7 @@ namespace CargoFlow.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Addresses", t =>
+                    b.ToTable("Addresses", null, t =>
                         {
                             t.HasCheckConstraint("Ck_Address_Latitude_Range", "[Latitude] BETWEEN -90 AND 90");
 
@@ -76,7 +76,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("TaxID")
                         .IsUnique();
 
-                    b.ToTable("Companies");
+                    b.ToTable("Companies", (string)null);
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.Customer", b =>
@@ -102,7 +102,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("NationalId")
                         .IsUnique();
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.Driver", b =>
@@ -136,7 +136,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("Phone")
                         .IsUnique();
 
-                    b.ToTable("Drivers");
+                    b.ToTable("Drivers", (string)null);
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.Offer", b =>
@@ -171,7 +171,7 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("ShipmentId");
 
-                    b.ToTable("Offers", t =>
+                    b.ToTable("Offers", null, t =>
                         {
                             t.HasCheckConstraint("Ck_Offer_Price_Min", "[Price] > 0");
                         });
@@ -195,7 +195,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("OfferStates");
+                    b.ToTable("OfferStates", (string)null);
 
                     b.HasData(
                         new
@@ -271,7 +271,7 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("WinningOfferId", "Id");
 
-                    b.ToTable("Shipments", t =>
+                    b.ToTable("Shipments", null, t =>
                         {
                             t.HasCheckConstraint("Ck_Shipment_Weight_Min", "[Weight] > 0");
                         });
@@ -295,7 +295,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("ShipmentStatuses");
+                    b.ToTable("ShipmentStatuses", (string)null);
 
                     b.HasData(
                         new
@@ -365,7 +365,7 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("ShipmentStatusId");
 
-                    b.ToTable("ShipmentStatusHistories");
+                    b.ToTable("ShipmentStatusHistories", (string)null);
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.Vehicle", b =>
@@ -416,7 +416,7 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("WeightTypeId");
 
-                    b.ToTable("Vehicles", t =>
+                    b.ToTable("Vehicles", null, t =>
                         {
                             t.HasCheckConstraint("Ck_Vehicle_MaxWeight_Min", "[MaxWeight] > 0");
                         });
@@ -440,7 +440,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("WeightTypes");
+                    b.ToTable("WeightTypes", (string)null);
 
                     b.HasData(
                         new

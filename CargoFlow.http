@@ -6,4 +6,14 @@ Accept: application/json
 ###
 
 GET {{CargoFlow_HostAddress}}/api/weight-types/7
+Accept: application/json
+###
+
+POST {{CargoFlow_HostAddress}}/api/customers
+Content-Type: application/json
+
+{
+  "name": "Yassin Khalid Ahmed",
+  "national_id": "123456789"
+}
 ###
