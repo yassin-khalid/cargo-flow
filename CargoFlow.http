@@ -13,11 +13,11 @@ POST {{CargoFlow_HostAddress}}/api/customers
 Content-Type: application/json
 
 {
-  "name": "Yassin Khalid Ahmed",
-  "national_id": "123456789"
+  "name": "Muzaffar Ragab",
+  "national_id": "123457789"
 }
 ###
 
-GET {{CargoFlow_HostAddress}}/api/customers/1
+GET {{CargoFlow_HostAddress}}/api/customers/5
 Accept: application/json
 ###
