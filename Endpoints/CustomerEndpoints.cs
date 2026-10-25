@@ -44,11 +44,9 @@ public static class CustomerEndpoints
     {
         return await db.Customers
             .AsNoTracking()
-            .Where(c => c.Id == id)
-            .Select(c => new CustomerDto(c.Id, c.Name, c.NationalId))
-            .FirstOrDefaultAsync() switch
+            .FirstOrDefaultAsync(c => c.Id == id) switch
         {
-            { } customer => TypedResults.Ok(customer),
+            { } customer => TypedResults.Ok(new CustomerDto(customer.Id, customer.Name, customer.NationalId)),
             _ => TypedResults.NotFound()
         };
     }

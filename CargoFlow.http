@@ -18,6 +18,6 @@ Content-Type: application/json
 }
 ###
 
-GET {{CargoFlow_HostAddress}}/api/customers/5
+GET {{CargoFlow_HostAddress}}/api/customers/1
 Accept: application/json
 ###
