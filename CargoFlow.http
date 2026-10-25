@@ -17,3 +17,7 @@ Content-Type: application/json
   "national_id": "123456789"
 }
 ###
+
+GET {{CargoFlow_HostAddress}}/api/customers/5
+Accept: application/json
+###
