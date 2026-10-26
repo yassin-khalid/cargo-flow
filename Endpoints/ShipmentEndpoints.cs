@@ -30,7 +30,7 @@ public static class ShipmentEndpoints
         };
     }
 
-    private static async Task<Results<CreatedAtRoute<ShipmentDto>, ValidationProblem>> CreateShipment(CargoFlowDbContext db, CreateShipmentRequestDto dto)
+    private static async Task<Results<CreatedAtRoute<ShipmentDto>, ValidationProblem, ProblemHttpResult>> CreateShipment(CargoFlowDbContext db, CreateShipmentRequestDto dto)
     {
         var isCustomerExists = await db.Customers.AnyAsync(c => c.Id == dto.CustomerId);
         if (!isCustomerExists)
@@ -61,6 +61,14 @@ public static class ShipmentEndpoints
             .Where(s => s.Name == "Draft")
             .Select(s => s.Id)
             .FirstOrDefaultAsync();
+
+        if (draftShipmentId is 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Draft' status) is missing. Please ensure the database seeder has been executed.");
+        }
 
         var shipment = new Shipment()
         {
