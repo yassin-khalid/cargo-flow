@@ -12,12 +12,12 @@ public static class CustomerEndpoints
     public static RouteGroupBuilder MapCustomerEndpoints(this RouteGroupBuilder group)
     {
         group.MapPost("/", CreateCustomer);
-        group.MapGet("/{id}", GetCustomer)
-            .WithName(EndpointRouteNamesHelpers.GetCustomerByIdRoute);
+        group.MapGet("/{id:int}", GetCustomer)
+            .WithName(EndpointRouteNames.GetCustomerByIdRoute);
         return group;
     }
 
-    private static async Task<Results<CreatedAtRoute<CustomerDto>, Conflict<string>>> CreateCustomer(
+    private static async Task<Results<CreatedAtRoute<CustomerDto>, ValidationProblem>> CreateCustomer(
         CreateCustomerRequestDto customer,
         CargoFlowDbContext db)
     {
@@ -33,13 +33,16 @@ public static class CustomerEndpoints
         {
             await db.SaveChangesAsync();
         }
-        catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex))
+        catch (DbUpdateException ex) when (ExceptionsHelpers.IsNationalIdUniqueConstraintViolation(ex))
         {
-            return TypedResults.Conflict("NationalId is taken");
+            return TypedResults.ValidationProblem(errors: new Dictionary<string, string[]>
+            {
+                ["NationalId"] = ["NationalId is taken"]
+            });
         }
 
         return TypedResults.CreatedAtRoute(
-            routeName: EndpointRouteNamesHelpers.GetCustomerByIdRoute,
+            routeName: EndpointRouteNames.GetCustomerByIdRoute,
             routeValues: new
             {
                 id = cust.Id

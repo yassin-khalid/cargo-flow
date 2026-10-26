@@ -13,8 +13,8 @@ POST {{CargoFlow_HostAddress}}/api/customers
 Content-Type: application/json
 
 {
-  "name": "Muzaffar Ragab",
-  "national_id": "123457789"
+  "name": "Mohammed Al-Sayed",
+  "national_id": "369821475"
 }
 ###
 

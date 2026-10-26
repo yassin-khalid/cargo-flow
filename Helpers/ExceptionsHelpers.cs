@@ -5,12 +5,19 @@ namespace CargoFlow.Helpers;
 
 public class ExceptionsHelpers
 {
-    public static bool IsUniqueConstraintViolation(DbUpdateException ex)
+    public static bool IsNationalIdUniqueConstraintViolation(DbUpdateException ex)
     {
-        if (ex.InnerException is SqlException sqlEx)
+        if (ex.InnerException is not SqlException sqlEx)
         {
-            return sqlEx.Number is 2601 or 2627;
+            return false;
         }
-        return false;
+
+        if (sqlEx.Number is not (2601 or 2627))
+        {
+            return false;
+        }
+
+        return sqlEx.Message
+        .Contains("IX_Customers_NationalId", StringComparison.OrdinalIgnoreCase);
     }
 }
