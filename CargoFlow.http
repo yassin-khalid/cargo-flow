@@ -21,3 +21,15 @@ Content-Type: application/json
 GET {{CargoFlow_HostAddress}}/api/customers/5
 Accept: application/json
 ###
+
+POST {{CargoFlow_HostAddress}}/api/shipments
+Content-Type: application/json
+
+{
+  "customer_id": 1,
+  "weight_type_id": 1,
+  "weight": 500,
+  "destination_id": 2,
+  "pickup_id": 1
+}
+###

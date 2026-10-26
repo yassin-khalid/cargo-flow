@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CargoFlow.Migrations
 {
     [DbContext(typeof(CargoFlowDbContext))]
-    [Migration("20261024180952_InitialCreate")]
+    [Migration("20261026195251_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -34,10 +34,12 @@ namespace CargoFlow.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Latitude")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
 
                     b.Property<decimal>("Longitude")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
 
                     b.HasKey("Id");
 
@@ -153,6 +155,11 @@ namespace CargoFlow.Migrations
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("HasWon")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<int>("OfferStateId")
                         .HasColumnType("int");
 
@@ -172,7 +179,9 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("OfferStateId");
 
-                    b.HasIndex("ShipmentId");
+                    b.HasIndex("ShipmentId")
+                        .IsUnique()
+                        .HasFilter("[HasWon] = 1");
 
                     b.ToTable("Offers", t =>
                         {
@@ -236,7 +245,10 @@ namespace CargoFlow.Migrations
             modelBuilder.Entity("CargoFlow.Domain.Shipment", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
@@ -257,9 +269,6 @@ namespace CargoFlow.Migrations
                     b.Property<int>("WeightTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("WinningOfferId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -271,8 +280,6 @@ namespace CargoFlow.Migrations
                     b.HasIndex("ShipmentStatusId");
 
                     b.HasIndex("WeightTypeId");
-
-                    b.HasIndex("WinningOfferId", "Id");
 
                     b.ToTable("Shipments", t =>
                         {
@@ -528,12 +535,6 @@ namespace CargoFlow.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CargoFlow.Domain.Offer", "WinningOffer")
-                        .WithMany()
-                        .HasForeignKey("WinningOfferId", "Id")
-                        .HasPrincipalKey("Id", "ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Customer");
 
                     b.Navigation("Destination");
@@ -543,8 +544,6 @@ namespace CargoFlow.Migrations
                     b.Navigation("ShipmentStatus");
 
                     b.Navigation("WeightType");
-
-                    b.Navigation("WinningOffer");
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.ShipmentStatusHistory", b =>

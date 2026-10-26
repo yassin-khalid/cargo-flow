@@ -19,8 +19,8 @@ namespace CargoFlow.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Latitude = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Longitude = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Latitude = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: false),
+                    Longitude = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -119,6 +119,55 @@ namespace CargoFlow.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Shipments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    PickupId = table.Column<int>(type: "int", nullable: false),
+                    DestinationId = table.Column<int>(type: "int", nullable: false),
+                    Weight = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    WeightTypeId = table.Column<int>(type: "int", nullable: false),
+                    ShipmentStatusId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Shipments", x => x.Id);
+                    table.CheckConstraint("Ck_Shipment_Weight_Min", "[Weight] > 0");
+                    table.ForeignKey(
+                        name: "FK_Shipments_Addresses_DestinationId",
+                        column: x => x.DestinationId,
+                        principalTable: "Addresses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Shipments_Addresses_PickupId",
+                        column: x => x.PickupId,
+                        principalTable: "Addresses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Shipments_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Shipments_ShipmentStatuses_ShipmentStatusId",
+                        column: x => x.ShipmentStatusId,
+                        principalTable: "ShipmentStatuses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Shipments_WeightTypes_WeightTypeId",
+                        column: x => x.WeightTypeId,
+                        principalTable: "WeightTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Vehicles",
                 columns: table => new
                 {
@@ -161,12 +210,12 @@ namespace CargoFlow.Migrations
                     CompanyId = table.Column<int>(type: "int", nullable: false),
                     SubmittedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    OfferStateId = table.Column<int>(type: "int", nullable: false)
+                    OfferStateId = table.Column<int>(type: "int", nullable: false),
+                    HasWon = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Offers", x => x.Id);
-                    table.UniqueConstraint("AK_Offers_Id_ShipmentId", x => new { x.Id, x.ShipmentId });
                     table.CheckConstraint("Ck_Offer_Price_Min", "[Price] > 0");
                     table.ForeignKey(
                         name: "FK_Offers_Companies_CompanyId",
@@ -180,59 +229,10 @@ namespace CargoFlow.Migrations
                         principalTable: "OfferStates",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Shipments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
-                    PickupId = table.Column<int>(type: "int", nullable: false),
-                    DestinationId = table.Column<int>(type: "int", nullable: false),
-                    Weight = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    WeightTypeId = table.Column<int>(type: "int", nullable: false),
-                    ShipmentStatusId = table.Column<int>(type: "int", nullable: false),
-                    WinningOfferId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Shipments", x => x.Id);
-                    table.CheckConstraint("Ck_Shipment_Weight_Min", "[Weight] > 0");
                     table.ForeignKey(
-                        name: "FK_Shipments_Addresses_DestinationId",
-                        column: x => x.DestinationId,
-                        principalTable: "Addresses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Shipments_Addresses_PickupId",
-                        column: x => x.PickupId,
-                        principalTable: "Addresses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Shipments_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Shipments_Offers_WinningOfferId_Id",
-                        columns: x => new { x.WinningOfferId, x.Id },
-                        principalTable: "Offers",
-                        principalColumns: new[] { "Id", "ShipmentId" },
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Shipments_ShipmentStatuses_ShipmentStatusId",
-                        column: x => x.ShipmentStatusId,
-                        principalTable: "ShipmentStatuses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Shipments_WeightTypes_WeightTypeId",
-                        column: x => x.WeightTypeId,
-                        principalTable: "WeightTypes",
+                        name: "FK_Offers_Shipments_ShipmentId",
+                        column: x => x.ShipmentId,
+                        principalTable: "Shipments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -343,7 +343,9 @@ namespace CargoFlow.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Offers_ShipmentId",
                 table: "Offers",
-                column: "ShipmentId");
+                column: "ShipmentId",
+                unique: true,
+                filter: "[HasWon] = 1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OfferStates_Name",
@@ -375,11 +377,6 @@ namespace CargoFlow.Migrations
                 name: "IX_Shipments_WeightTypeId",
                 table: "Shipments",
                 column: "WeightTypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Shipments_WinningOfferId_Id",
-                table: "Shipments",
-                columns: new[] { "WinningOfferId", "Id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ShipmentStatuses_Name",
@@ -424,33 +421,16 @@ namespace CargoFlow.Migrations
                 table: "WeightTypes",
                 column: "Name",
                 unique: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Offers_Shipments_ShipmentId",
-                table: "Offers",
-                column: "ShipmentId",
-                principalTable: "Shipments",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Offers_Companies_CompanyId",
-                table: "Offers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Offers_OfferStates_OfferStateId",
-                table: "Offers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Offers_Shipments_ShipmentId",
-                table: "Offers");
-
             migrationBuilder.DropTable(
                 name: "Drivers");
+
+            migrationBuilder.DropTable(
+                name: "Offers");
 
             migrationBuilder.DropTable(
                 name: "ShipmentStatusHistories");
@@ -459,22 +439,19 @@ namespace CargoFlow.Migrations
                 name: "Vehicles");
 
             migrationBuilder.DropTable(
-                name: "Companies");
-
-            migrationBuilder.DropTable(
                 name: "OfferStates");
 
             migrationBuilder.DropTable(
                 name: "Shipments");
 
             migrationBuilder.DropTable(
+                name: "Companies");
+
+            migrationBuilder.DropTable(
                 name: "Addresses");
 
             migrationBuilder.DropTable(
                 name: "Customers");
-
-            migrationBuilder.DropTable(
-                name: "Offers");
 
             migrationBuilder.DropTable(
                 name: "ShipmentStatuses");

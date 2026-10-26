@@ -31,14 +31,16 @@ namespace CargoFlow.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Latitude")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
 
                     b.Property<decimal>("Longitude")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Addresses", null, t =>
+                    b.ToTable("Addresses", t =>
                         {
                             t.HasCheckConstraint("Ck_Address_Latitude_Range", "[Latitude] BETWEEN -90 AND 90");
 
@@ -76,7 +78,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("TaxID")
                         .IsUnique();
 
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.Customer", b =>
@@ -102,7 +104,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("NationalId")
                         .IsUnique();
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.Driver", b =>
@@ -136,7 +138,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("Phone")
                         .IsUnique();
 
-                    b.ToTable("Drivers", (string)null);
+                    b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.Offer", b =>
@@ -149,6 +151,11 @@ namespace CargoFlow.Migrations
 
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("HasWon")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<int>("OfferStateId")
                         .HasColumnType("int");
@@ -169,9 +176,11 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("OfferStateId");
 
-                    b.HasIndex("ShipmentId");
+                    b.HasIndex("ShipmentId")
+                        .IsUnique()
+                        .HasFilter("[HasWon] = 1");
 
-                    b.ToTable("Offers", null, t =>
+                    b.ToTable("Offers", t =>
                         {
                             t.HasCheckConstraint("Ck_Offer_Price_Min", "[Price] > 0");
                         });
@@ -195,7 +204,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("OfferStates", (string)null);
+                    b.ToTable("OfferStates");
 
                     b.HasData(
                         new
@@ -233,7 +242,10 @@ namespace CargoFlow.Migrations
             modelBuilder.Entity("CargoFlow.Domain.Shipment", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
@@ -254,9 +266,6 @@ namespace CargoFlow.Migrations
                     b.Property<int>("WeightTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("WinningOfferId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -269,9 +278,7 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("WeightTypeId");
 
-                    b.HasIndex("WinningOfferId", "Id");
-
-                    b.ToTable("Shipments", null, t =>
+                    b.ToTable("Shipments", t =>
                         {
                             t.HasCheckConstraint("Ck_Shipment_Weight_Min", "[Weight] > 0");
                         });
@@ -295,7 +302,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("ShipmentStatuses", (string)null);
+                    b.ToTable("ShipmentStatuses");
 
                     b.HasData(
                         new
@@ -365,7 +372,7 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("ShipmentStatusId");
 
-                    b.ToTable("ShipmentStatusHistories", (string)null);
+                    b.ToTable("ShipmentStatusHistories");
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.Vehicle", b =>
@@ -416,7 +423,7 @@ namespace CargoFlow.Migrations
 
                     b.HasIndex("WeightTypeId");
 
-                    b.ToTable("Vehicles", null, t =>
+                    b.ToTable("Vehicles", t =>
                         {
                             t.HasCheckConstraint("Ck_Vehicle_MaxWeight_Min", "[MaxWeight] > 0");
                         });
@@ -440,7 +447,7 @@ namespace CargoFlow.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("WeightTypes", (string)null);
+                    b.ToTable("WeightTypes");
 
                     b.HasData(
                         new
@@ -525,12 +532,6 @@ namespace CargoFlow.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CargoFlow.Domain.Offer", "WinningOffer")
-                        .WithMany()
-                        .HasForeignKey("WinningOfferId", "Id")
-                        .HasPrincipalKey("Id", "ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Customer");
 
                     b.Navigation("Destination");
@@ -540,8 +541,6 @@ namespace CargoFlow.Migrations
                     b.Navigation("ShipmentStatus");
 
                     b.Navigation("WeightType");
-
-                    b.Navigation("WinningOffer");
                 });
 
             modelBuilder.Entity("CargoFlow.Domain.ShipmentStatusHistory", b =>

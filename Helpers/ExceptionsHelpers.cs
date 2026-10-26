@@ -20,4 +20,20 @@ public class ExceptionsHelpers
         return sqlEx.Message
         .Contains("IX_Customers_NationalId", StringComparison.OrdinalIgnoreCase);
     }
+
+    public static bool IsForeignKeyViolation(DbUpdateException ex, string constraintName)
+    {
+        if (ex.InnerException is not SqlException sqlEx)
+        {
+            return false;
+        }
+
+        // 547 is the SQL Server error number for foreign key conflicts
+        if (sqlEx.Number is not 547)
+        {
+            return false;
+        }
+
+        return sqlEx.Message.Contains(constraintName, StringComparison.OrdinalIgnoreCase);
+    }
 }

@@ -26,4 +26,8 @@ group
     .MapGroup("/customers")
     .MapCustomerEndpoints();
 
+group
+    .MapGroup("/shipments")
+    .MapShipmentEndpoints();
+
 app.Run();
