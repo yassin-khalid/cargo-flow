@@ -17,7 +17,7 @@ public static class CustomerEndpoints
         return group;
     }
 
-    private static async Task<Results<CreatedAtRoute<CustomerDto>, ValidationProblem>> CreateCustomer(
+    private static async Task<Results<CreatedAtRoute<CustomerDto>, ProblemHttpResult>> CreateCustomer(
         CreateCustomerRequestDto customer,
         CargoFlowDbContext db)
     {
@@ -35,10 +35,17 @@ public static class CustomerEndpoints
         }
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsNationalIdUniqueConstraintViolation(ex))
         {
-            return TypedResults.ValidationProblem(errors: new Dictionary<string, string[]>
-            {
-                ["NationalId"] = ["NationalId is taken"]
-            });
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Conflict",
+                detail: "A customer with this National ID already exists",
+                extensions: new Dictionary<string, object?>
+                {
+                    ["errors"] = new Dictionary<string, string[]>
+                    {
+                        ["NationalId"] = ["National id is taken"]
+                    }
+                });
         }
 
         return TypedResults.CreatedAtRoute(
