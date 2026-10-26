@@ -30,15 +30,45 @@ public static class ShipmentEndpoints
         };
     }
 
-    private static async Task<Results<CreatedAtRoute<ShipmentDto>, ProblemHttpResult>> CreateShipment(CargoFlowDbContext db, CreateShipmentDto dto)
+    private static async Task<Results<CreatedAtRoute<ShipmentDto>, ValidationProblem>> CreateShipment(CargoFlowDbContext db, CreateShipmentRequestDto dto)
     {
+        var isCustomerExists = await db.Customers.AnyAsync(c => c.Id == dto.CustomerId);
+        if (!isCustomerExists)
+        {
+            return HttpResultProblems.ValidationProblem("customer_id", ["customer_id not exists"]);
+        }
+
+        var isPickupAddressExists = await db.Addresses.AnyAsync(a => a.Id == dto.PickupId);
+        if (!isPickupAddressExists)
+        {
+            return HttpResultProblems.ValidationProblem("pickup_id", ["pickup_id not exists"]);
+        }
+
+        var isDestinationAddressExists = await db.Addresses.AnyAsync(a => a.Id == dto.DestinationId);
+        if (!isDestinationAddressExists)
+        {
+            return HttpResultProblems.ValidationProblem("destination_id", ["destination_id not exists"]);
+        }
+
+        var isWeightTypeExists = await db.WeightTypes.AnyAsync(w => w.Id == dto.WeightTypeId);
+        if (!isWeightTypeExists)
+        {
+            return HttpResultProblems.ValidationProblem("weight_type_id", ["weight_type_id not exists"]);
+        }
+
+        var draftShipmentId = await db
+            .ShipmentStatuses
+            .Where(s => s.Name == "Draft")
+            .Select(s => s.Id)
+            .FirstOrDefaultAsync();
+
         var shipment = new Shipment()
         {
             CustomerId = dto.CustomerId,
             DestinationId = dto.DestinationId,
             PickupId = dto.PickupId,
             WeightTypeId = dto.WeightTypeId,
-            ShipmentStatusId = 1,
+            ShipmentStatusId = draftShipmentId,
             Weight = dto.Weight
         };
 
@@ -49,19 +79,19 @@ public static class ShipmentEndpoints
         }
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex, "FK_Shipments_Customers_CustomerId"))
         {
-            return HttpResultProblems.ValidationProblem("No customer found", "Invalid CustomerId", "customer_id", ["customer_id not exists"]);
+            return HttpResultProblems.ValidationProblem("customer_id", ["customer_id not exists"]);
         }
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex, "FK_Shipments_Addresses_PickupId"))
         {
-            return HttpResultProblems.ValidationProblem("No pickup address found", "Invalid PickupId", "pickup_id", ["pickup_id not exists"]);
+            return HttpResultProblems.ValidationProblem("pickup_id", ["pickup_id not exists"]);
         }
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex, "FK_Shipments_Addresses_DestinationId"))
         {
-            return HttpResultProblems.ValidationProblem("No destination address found", "Invalid DestinationId", "destination_id", ["destination_id not exists"]);
+            return HttpResultProblems.ValidationProblem("destination_id", ["destination_id not exists"]);
         }
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex, "FK_Shipments_WeightTypes_WeightTypeId"))
         {
-            return HttpResultProblems.ValidationProblem("No weight type found", "Invalid WeightTypeId", "weight_type_id", ["weight_type_id not exists"]);
+            return HttpResultProblems.ValidationProblem("weight_type_id", ["weight_type_id not exists"]);
         }
 
 

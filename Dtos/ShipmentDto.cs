@@ -13,7 +13,7 @@ public record ShipmentDto(
     int ShipmentStatusId
 );
 
-public record CreateShipmentDto(
+public record CreateShipmentRequestDto(
     int CustomerId,
     int PickupId,
     int DestinationId,
