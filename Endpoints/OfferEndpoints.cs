@@ -113,6 +113,7 @@ public static class OfferEndpoints
                 title: "Duplicate offer",
                 detail: $"you've already a submitted an offer for this shipment #{shipmentId}");
         }
+       // this is unnecessary and can be removed because HasWon is always false here! 
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex,
                                                "IX_Offers_ShipmentId_CompanyId"))
         {
