@@ -12,9 +12,9 @@ public static class OfferEndpoints
 {
     public static RouteGroupBuilder MapOfferEndpoints(this RouteGroupBuilder group)
     {
-        group.MapPost("/{shipmentId:int}/offers", SubmitOffer)
+        group.MapPost("/{shipmentId:int}/offers", SubmitOffer);
+        group.MapGet("/{shipmentId:int}/offers/{id:int}", GetShipmentOffer)
             .WithName(EndpointRouteNames.GetShipmentOfferByIdRoute);
-        group.MapGet("/{shipmentId:int}/offers/{id:int}", GetShipmentOffer);
         return group;
     }
 
@@ -68,7 +68,10 @@ public static class OfferEndpoints
 
         if (shipmentStatus is not "Open for Offers")
         {
-            return HttpResultProblems.ValidationProblem("shipment_id", ["this shipment is not opened for offers"]);
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Invalid offer",
+                detail: $"shipment with id {shipmentId} is not opened for offers");
         }
 
         var offerStateId = await db.OfferStates
@@ -88,9 +91,9 @@ public static class OfferEndpoints
         {
             CompanyId = body.CompanyId,
             ShipmentId = shipmentId,
-            OfferStateId = 1,
+            OfferStateId = offerStateId,
             Price = body.Price,
-            SubmittedDate = DateTime.Now,
+            SubmittedDate = DateTime.UtcNow,
             HasWon = false
         };
 
@@ -100,15 +103,28 @@ public static class OfferEndpoints
         {
             await db.SaveChangesAsync();
         }
-        catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex, "AK_Offers_Id_ShipmentId"))
+        catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex,
+                                               "IX_Offers_ShipmentId_CompanyId"))
         {
-            return HttpResultProblems.ValidationProblem("shipment_id",
-                ["you've already a submitted an offer for this shipment"]);
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Duplicate offer",
+                detail: $"you've already a submitted an offer for this shipment #{shipmentId}");
+        }
+        catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex,
+                                               "IX_Offers_Shipment_CompanyId"))
+        {
+            
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: $"Invalid offer",
+                detail: $"Shipment #{shipmentId} has already a winning offer");
         }
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex,
                                                "FK_Offers_OfferStates_OfferStateId"))
         {
             
+            return HttpResultProblems.ValidationProblem("offer_state_id", ["offer_state_id not exists"]);
         }
 
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex, "FK_Offers_Companies_CompanyId"))
@@ -116,6 +132,10 @@ public static class OfferEndpoints
             return HttpResultProblems.ValidationProblem("company_id", ["company_id not exists"]);
         }
 
+        catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex, "FK_Offers_Shipments_ShipmentId"))
+        {
+            return HttpResultProblems.ValidationProblem("shipment_id", ["shipment_id not exists"]);
+        }
 
         return TypedResults.CreatedAtRoute(
             routeName: EndpointRouteNames.GetShipmentOfferByIdRoute,
