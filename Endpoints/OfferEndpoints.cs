@@ -12,6 +12,7 @@ public static class OfferEndpoints
     public static RouteGroupBuilder MapOfferEndpoints(this RouteGroupBuilder group)
     {
         group.MapPost("/{shipmentId:int}/offers", SubmitOffer);
+        group.MapPost("/{shipmentId:int}/offers/{offerId:int}/award", AwardOffer);
         group.MapGet("/{shipmentId:int}/offers/{id:int}", GetShipmentOffer)
             .WithName(EndpointRouteNames.GetShipmentOfferByIdRoute);
         group.MapGet("/{shipmentId:int}/offers", GetShipmentOffers);
@@ -29,9 +30,9 @@ public static class OfferEndpoints
 
         return TypedResults.Ok(await db.Offers
             .Where(o => o.ShipmentId == shipmentId)
+            .OrderByDescending(o => o.SubmittedDate)
             .Select(o =>
                 new OfferDto(o.Id, o.ShipmentId, o.CompanyId, o.SubmittedDate, o.Price, o.OfferStateId, o.HasWon))
-            .OrderByDescending(o => o.SubmittedDate)
             .ToListAsync());
     }
 
@@ -162,5 +163,78 @@ public static class OfferEndpoints
                 id = offer.Id, 
                 shipmentId
             });
+    }
+
+    private static async Task<Results<NoContent, ProblemHttpResult>> AwardOffer(int shipmentId, int offerId, CargoFlowDbContext db)
+    {
+        var shipment = await db.Shipments.FirstOrDefaultAsync(s => s.Id == shipmentId);
+        if (shipment is null)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Shipment not found",
+                detail: $"shipment #{shipmentId} not found"
+            );
+        }
+
+        var offer = await db.Offers
+            .FirstOrDefaultAsync(o => o.Id == offerId && o.ShipmentId == shipmentId);
+        if (offer is null)
+        {
+            
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Offer not found",
+                detail: $"Offer #{offerId} is either not exists or does not belong to shipment #{shipmentId}"
+            );
+        }
+
+        var offerStateId = await db.OfferStates
+            .Where(os => os.Name == "Accepted")
+            .Select(os => os.Id)
+            .FirstOrDefaultAsync();
+
+        if (offerStateId == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Accepted' state) is missing. Please ensure the database seeder has been executed."
+            );
+        }
+
+        var shipmentStatusId = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Awarded")
+            .Select(ss => ss.Id)
+            .FirstOrDefaultAsync();
+
+        if (shipmentStatusId == 0)
+        {
+            
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Awarded' status) is missing. Please ensure the database seeder has been executed."
+            );
+        }
+
+        offer.OfferStateId = offerStateId;
+        offer.HasWon = true;
+        shipment.ShipmentStatusId = shipmentStatusId;
+
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ExceptionsHelpers
+                                               .IsUniqueConstraintViolation(ex, "IX_Offers_ShipmentId"))
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Invalid Operation",
+                detail: $"shipment #{shipmentId} already has an accepted offer, can not accept offer #{offerId}");
+        }
+
+        return TypedResults.NoContent();
     }
 }

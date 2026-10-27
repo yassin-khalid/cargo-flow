@@ -28,20 +28,23 @@ Content-Type: application/json
 {
   "customer_id": 1,
   "weight_type_id": 1,
-  "weight": 500,
+  "weight": 300,
   "destination_id": 2,
   "pickup_id": 1
 }
 ###
 
-POST {{CargoFlow_HostAddress}}/api/shipments/1/offers
+POST {{CargoFlow_HostAddress}}/api/shipments/2/offers
 Content-Type: application/json
 
 {
   "company_id": 1,
-  "price": 300
+  "price": 500
 }
 
 ###
-GET {{CargoFlow_HostAddress}}/api/shipments/111/offers
+GET {{CargoFlow_HostAddress}}/api/shipments/2/offers
+###
+
+POST {{CargoFlow_HostAddress}}/api/shipments/2/offers/3/award
 ###
