@@ -21,7 +21,7 @@ public abstract class ExceptionsHelpers
 
     public static bool IsUniqueConstraintViolation(DbUpdateException ex, string constraintName)
     {
-        return ex.InnerException is SqlException { Number: (2601 or 2676), Message : var message } &&
+        return ex.InnerException is SqlException { Number: (2601 or 2627), Message : var message } &&
                message.Contains(constraintName, StringComparison.OrdinalIgnoreCase);
     }
     

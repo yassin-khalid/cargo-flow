@@ -57,8 +57,10 @@ public static class OfferEndpoints
            await db.Offers.AnyAsync(o => o.CompanyId == body.CompanyId && o.ShipmentId == shipmentId);
         if (isNotTheFirstOffer)
         {
-            return HttpResultProblems.ValidationProblem("shipment_id",
-                ["you've already a submitted an offer for this shipment"]);
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Duplicate offer",
+                detail: $"you've already a submitted an offer for this shipment #{shipmentId}");
         }
 
         var shipmentStatus = await db.Shipments
@@ -112,7 +114,7 @@ public static class OfferEndpoints
                 detail: $"you've already a submitted an offer for this shipment #{shipmentId}");
         }
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex,
-                                               "IX_Offers_Shipment_CompanyId"))
+                                               "IX_Offers_ShipmentId_CompanyId"))
         {
             
             return TypedResults.Problem(
@@ -147,6 +149,10 @@ public static class OfferEndpoints
                 offer.Price,
                 offer.OfferStateId, 
                 offer.HasWon), 
-            routeValues:  new {id = offer.Id});
+            routeValues:  new
+            {
+                id = offer.Id, 
+                shipmentId
+            });
     }
 }
