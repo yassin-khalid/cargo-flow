@@ -33,7 +33,7 @@ public static class CustomerEndpoints
         {
             await db.SaveChangesAsync();
         }
-        catch (DbUpdateException ex) when (ExceptionsHelpers.IsNationalIdUniqueConstraintViolation(ex))
+        catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex, "IX_Customers_NationalId"))
         {
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status409Conflict,

@@ -33,3 +33,12 @@ Content-Type: application/json
   "pickup_id": 1
 }
 ###
+
+POST {{CargoFlow_HostAddress}}/api/shipments/1/offers
+Content-Type: application/json
+
+{
+  "company_id": 1,
+  "price": 300
+}
+###

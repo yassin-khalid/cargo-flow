@@ -180,6 +180,9 @@ namespace CargoFlow.Migrations
                         .IsUnique()
                         .HasFilter("[HasWon] = 1");
 
+                    b.HasIndex("ShipmentId", "CompanyId")
+                        .IsUnique();
+
                     b.ToTable("Offers", t =>
                         {
                             t.HasCheckConstraint("Ck_Offer_Price_Min", "[Price] > 0");

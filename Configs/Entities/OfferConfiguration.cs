@@ -10,6 +10,10 @@ public class OfferConfiguration : IEntityTypeConfiguration<Offer>
     {
 
         builder
+            .HasIndex((o => new { o.ShipmentId, o.CompanyId }))
+            .IsUnique();
+        
+        builder
         .Property(o => o.HasWon)
         .HasDefaultValue(false)
         .IsRequired();

@@ -12,4 +12,13 @@ public static class HttpResultProblems
                 [field] = messages
             });
     }
+
+    public static ProblemHttpResult NotFoundProblem(string field, int id)
+    {
+        return TypedResults.Problem(
+            statusCode: StatusCodes.Status404NotFound,
+            title: "Not Found",
+            detail: $"{field} => {id} not found"
+            );
+    }
 }
