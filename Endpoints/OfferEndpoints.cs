@@ -1,4 +1,3 @@
-using System.Threading.Tasks.Dataflow;
 using CargoFlow.Data;
 using CargoFlow.Domain;
 using CargoFlow.Dtos;
@@ -115,7 +114,7 @@ public static class OfferEndpoints
         }
        // this is unnecessary and can be removed because HasWon is always false here! 
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex,
-                                               "IX_Offers_ShipmentId_CompanyId"))
+                                               "IX_Offers_ShipmentId"))
         {
             
             return TypedResults.Problem(
