@@ -41,4 +41,7 @@ Content-Type: application/json
   "company_id": 1,
   "price": 300
 }
+
+###
+GET {{CargoFlow_HostAddress}}/api/shipments/111/offers
 ###

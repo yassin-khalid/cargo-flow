@@ -14,7 +14,24 @@ public static class OfferEndpoints
         group.MapPost("/{shipmentId:int}/offers", SubmitOffer);
         group.MapGet("/{shipmentId:int}/offers/{id:int}", GetShipmentOffer)
             .WithName(EndpointRouteNames.GetShipmentOfferByIdRoute);
+        group.MapGet("/{shipmentId:int}/offers", GetShipmentOffers);
         return group;
+    }
+
+    private static async Task<Results<Ok<List<OfferDto>>, ProblemHttpResult>> GetShipmentOffers(int shipmentId,
+        CargoFlowDbContext db)
+    {
+        var isShipmentExists = await db.Shipments.AnyAsync(s => s.Id == shipmentId);
+        if (!isShipmentExists)
+        {
+            return HttpResultProblems.NotFoundProblem("shipment_id", shipmentId);
+        }
+
+        return TypedResults.Ok(await db.Offers
+            .Where(o => o.ShipmentId == shipmentId)
+            .Select(o =>
+                new OfferDto(o.Id, o.ShipmentId, o.CompanyId, o.SubmittedDate, o.Price, o.OfferStateId, o.HasWon))
+            .ToListAsync());
     }
 
     private static async Task<Results<Ok<OfferDto>, ProblemHttpResult>> GetShipmentOffer(int id, int shipmentId, CargoFlowDbContext db)
