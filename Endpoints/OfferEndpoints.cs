@@ -31,6 +31,7 @@ public static class OfferEndpoints
             .Where(o => o.ShipmentId == shipmentId)
             .Select(o =>
                 new OfferDto(o.Id, o.ShipmentId, o.CompanyId, o.SubmittedDate, o.Price, o.OfferStateId, o.HasWon))
+            .OrderByDescending(o => o.SubmittedDate)
             .ToListAsync());
     }
 
