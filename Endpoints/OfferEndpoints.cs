@@ -112,16 +112,6 @@ public static class OfferEndpoints
                 title: "Duplicate offer",
                 detail: $"you've already a submitted an offer for this shipment #{shipmentId}");
         }
-       // this is unnecessary and can be removed because HasWon is always false here! 
-        catch (DbUpdateException ex) when (ExceptionsHelpers.IsUniqueConstraintViolation(ex,
-                                               "IX_Offers_ShipmentId"))
-        {
-            
-            return TypedResults.Problem(
-                statusCode: StatusCodes.Status409Conflict,
-                title: $"Invalid offer",
-                detail: $"Shipment #{shipmentId} has already a winning offer");
-        }
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex,
                                                "FK_Offers_OfferStates_OfferStateId"))
         {
