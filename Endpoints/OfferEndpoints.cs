@@ -199,7 +199,7 @@ public static class OfferEndpoints
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
                 title: "Database Configuration Error",
-                detail: "Required system lookup data ('Open For Offers' and 'Offers Received' status) is missing. Please ensure the database seeder has been executed.");
+                detail: "Required system lookup data ('Open For Offers' or 'Offers Received' status) is missing. Please ensure the database seeder has been executed.");
         }
 
         if (!validShipmentStatusIds.Contains(shipment.ShipmentStatusId))
