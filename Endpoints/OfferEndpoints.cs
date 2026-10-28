@@ -177,6 +177,28 @@ public static class OfferEndpoints
             );
         }
 
+        var openForOffersStatusId = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Open for Offers")
+            .Select(ss => ss.Id)
+            .FirstOrDefaultAsync();
+
+        if (openForOffersStatusId == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Open For Offers' status) is missing. Please ensure the database seeder has been executed.");
+        }
+
+        if (shipment.ShipmentStatusId != openForOffersStatusId)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Shipment Status Issue",
+                detail: $"Shipment #{shipmentId} is not open for offers"
+           );
+        }
+        
         var offer = await db.Offers
             .FirstOrDefaultAsync(o => o.Id == offerId && o.ShipmentId == shipmentId);
         if (offer is null)
@@ -218,6 +240,30 @@ public static class OfferEndpoints
             );
         }
 
+
+        var rejectedOfferStateId = await db.OfferStates
+            .Where(os => os.Name == "Rejected")
+            .Select(os => os.Id)
+            .FirstOrDefaultAsync();
+
+        if (rejectedOfferStateId is 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Rejected' state) is missing. Please ensure the database seeder has been executed."
+            );
+        }
+
+        var otherOffers = await db.Offers
+            .Where(o => o.Id != offerId && o.ShipmentId == shipmentId)
+            .ToListAsync();
+
+        foreach (var oo in otherOffers)
+        {
+            oo.OfferStateId = rejectedOfferStateId;
+        }
+            
         offer.OfferStateId = offerStateId;
         offer.HasWon = true;
         shipment.ShipmentStatusId = shipmentStatusId;
@@ -237,4 +283,5 @@ public static class OfferEndpoints
 
         return TypedResults.NoContent();
     }
+    
 }
