@@ -13,6 +13,7 @@ public static class OfferEndpoints
     {
         group.MapPost("/{shipmentId:int}/offers", SubmitOffer);
         group.MapPost("/{shipmentId:int}/offers/{offerId:int}/award", AwardOffer);
+        group.MapPost("/{shipmentId:int}/offers/{offerId:int}/withdraw", WithdrawOffer);
         group.MapGet("/{shipmentId:int}/offers/{id:int}", GetShipmentOffer)
             .WithName(EndpointRouteNames.GetShipmentOfferByIdRoute);
         group.MapGet("/{shipmentId:int}/offers", GetShipmentOffers);
@@ -112,7 +113,7 @@ public static class OfferEndpoints
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status409Conflict,
                 title: "Shipment Status Conflict Error",
-                detail: $"shipment with id {shipmentId} does not have 'Opened for Offers' or 'Offers Received' status");
+                detail: $"shipment with id {shipmentId} does not have 'Open for Offers' or 'Offers Received' status");
         }
 
         var offerStateId = await db.OfferStates
@@ -321,6 +322,103 @@ public static class OfferEndpoints
                 title: "Concurrency Conflict",
                 detail: $"Shipment #{shipmentId} was modified or awarded by another request");
         }
+
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<NoContent, ProblemHttpResult>> WithdrawOffer(int shipmentId, int offerId,
+        CargoFlowDbContext db)
+    {
+        var shipment = await db.Shipments.FirstOrDefaultAsync(s => s.Id == shipmentId);
+        if (shipment is null)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Shipment Not Found",
+                detail: $"shipment #{shipmentId} does not exist");
+        }
+
+        var offer = await db.Offers.FirstOrDefaultAsync(o => o.Id == offerId && o.ShipmentId == shipmentId);
+        if (offer is null)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Offer Not Found",
+                detail: $"offer #{offerId} is either does not exist or does not belong to shipment #{shipmentId}");
+        }
+
+        var openForOffersStatusId = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Open for Offers")
+            .Select(ss => ss.Id)
+            .FirstOrDefaultAsync();
+
+        if (openForOffersStatusId == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Open For Offers' status) is missing. Please ensure the database seeder has been executed.");
+        }
+
+        var offersReceivedStatusId = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Offers Received")
+            .Select(ss => ss.Id)
+            .FirstOrDefaultAsync();
+        
+        if (offersReceivedStatusId == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Offers Received' status) is missing. Please ensure the database seeder has been executed.");
+        }
+
+        if (shipment.ShipmentStatusId != offersReceivedStatusId
+            && shipment.ShipmentStatusId != openForOffersStatusId)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Shipment Status Conflict Error",
+                detail: $"shipment #{shipmentId} does not have status 'Offer Received' or 'Open for Offers'");
+        }
+
+        var submittedStateId = await db.OfferStates
+            .Where(os => os.Name == "Submitted")
+            .Select(os => os.Id)
+            .FirstOrDefaultAsync();
+
+        if (submittedStateId == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Submitted' state) is missing. Please ensure the database seeder has been executed.");           
+        }
+
+        if (offer.OfferStateId != submittedStateId)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Offer State Conflict Error",
+                detail: $"offer #{offerId} does not have 'Submitted' state");           
+        }
+
+        var withdrawnStateId = await db.OfferStates
+            .Where(os => os.Name == "Withdrawn")
+            .Select(os => os.Id)
+            .FirstOrDefaultAsync();
+
+        if (withdrawnStateId == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Withdrawn' state) is missing. Please ensure the database seeder has been executed.");           
+        }
+
+        offer.OfferStateId = withdrawnStateId;
+
+        await db.SaveChangesAsync();
 
         return TypedResults.NoContent();
     }
