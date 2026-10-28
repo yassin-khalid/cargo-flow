@@ -81,17 +81,28 @@ public static class OfferEndpoints
                 detail: $"you've already a submitted an offer for this shipment #{shipmentId}");
         }
 
-        var shipmentStatus = await db.Shipments
-           .Where(s => s.Id == shipmentId)
-           .Select(s => s.ShipmentStatus.Name)
-           .FirstAsync();
+        var shipment = await db.Shipments
+           .FirstAsync(s => s.Id == shipmentId);
 
-        if (shipmentStatus is not "Open for Offers")
+        var validShipmentStatuses = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Open for Offers" || ss.Name == "Offers Received")
+            .Select(ss => new { ss.Id , ss.Name})
+            .ToListAsync();
+
+        if (validShipmentStatuses.Count < 2)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Open for Offers' or 'Offers Received' status) is missing. Please ensure the database seeder has been executed.");
+        }
+
+        if (!validShipmentStatuses.Select(ss => ss.Id).Contains(shipment.ShipmentStatusId))
         {
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status409Conflict,
-                title: "Invalid offer",
-                detail: $"shipment with id {shipmentId} is not opened for offers");
+                title: "Shipment Status Conflict Error",
+                detail: $"shipment with id {shipmentId} does not have 'Opened for Offers' or 'Offers Received' status");
         }
 
         var offerStateId = await db.OfferStates
@@ -119,6 +130,11 @@ public static class OfferEndpoints
 
         db.Offers.Add(offer);
 
+        if (shipment.ShipmentStatusId == validShipmentStatuses.Find(ss => ss.Name == "Open for Offers")!.Id)
+        {
+            shipment.ShipmentStatusId = validShipmentStatuses.Find(ss => ss.Name == "Offers Received")!.Id;
+        }
+
         try
         {
             await db.SaveChangesAsync();
@@ -134,7 +150,7 @@ public static class OfferEndpoints
         catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex,
                                                "FK_Offers_OfferStates_OfferStateId"))
         {
-            
+
             return HttpResultProblems.ValidationProblem("offer_state_id", ["offer_state_id not exists"]);
         }
 
@@ -143,9 +159,17 @@ public static class OfferEndpoints
             return HttpResultProblems.ValidationProblem("company_id", ["company_id not exists"]);
         }
 
-        catch (DbUpdateException ex) when (ExceptionsHelpers.IsForeignKeyViolation(ex, "FK_Offers_Shipments_ShipmentId"))
+        catch (DbUpdateException ex) when
+            (ExceptionsHelpers.IsForeignKeyViolation(ex, "FK_Offers_Shipments_ShipmentId"))
         {
             return HttpResultProblems.ValidationProblem("shipment_id", ["shipment_id not exists"]);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Concurrency Conflict",
+                detail: $"Shipment #{shipmentId} was modified by another request");
         }
 
         return TypedResults.CreatedAtRoute(

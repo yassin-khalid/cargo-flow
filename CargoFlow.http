@@ -43,10 +43,10 @@ Content-Type: application/json
 }
 
 ###
-GET {{CargoFlow_HostAddress}}/api/shipments/2
+GET {{CargoFlow_HostAddress}}/api/shipments/2/
 ###
 
-POST {{CargoFlow_HostAddress}}/api/shipments/2/offers/3/award
+POST {{CargoFlow_HostAddress}}/api/shipments/2/offers/5/award
 ###
 
 POST {{CargoFlow_HostAddress}}/api/shipments/2/open-for-offers
