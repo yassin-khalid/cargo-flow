@@ -220,7 +220,7 @@ public static class OfferEndpoints
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status404NotFound,
                 title: "Offer not found",
-                detail: $"Offer #{offerId} is either not exists or does not belong to shipment #{shipmentId}"
+                detail: $"Offer #{offerId} either does not exists or does not belong to shipment #{shipmentId}"
             );
         }
 
@@ -418,7 +418,17 @@ public static class OfferEndpoints
 
         offer.OfferStateId = withdrawnStateId;
 
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Concurrency Conflict",
+                detail: $"offer #{offerId} was modified or awarded by another process concurrently. Please reload and try again.");
+        }
 
         return TypedResults.NoContent();
     }

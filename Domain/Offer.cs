@@ -16,4 +16,6 @@ public class Offer
     public int OfferStateId { get; set; }
     public OfferState OfferState { get; set; }
     public bool HasWon { get; set; }
+    [Timestamp]
+    public byte[] RowVersion { get; set; }
 }
