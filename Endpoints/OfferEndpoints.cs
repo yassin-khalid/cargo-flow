@@ -59,8 +59,8 @@ public static class OfferEndpoints
        SubmitOfferRequestBody body,
        CargoFlowDbContext db)
     {
-        var isShipmentExists = await db.Shipments.AnyAsync(s => s.Id == shipmentId);
-        if (!isShipmentExists)
+        var shipment = await db.Shipments.FirstOrDefaultAsync(s => s.Id == shipmentId);
+        if (shipment is null)
         {
             return HttpResultProblems.NotFoundProblem("shipment_id", shipmentId);
         }
@@ -81,23 +81,25 @@ public static class OfferEndpoints
                 detail: $"you've already a submitted an offer for this shipment #{shipmentId}");
         }
 
-        var shipment = await db.Shipments
-           .FirstAsync(s => s.Id == shipmentId);
-
-        var validShipmentStatuses = await db.ShipmentStatuses
-            .Where(ss => ss.Name == "Open for Offers" || ss.Name == "Offers Received")
-            .Select(ss => new { ss.Id , ss.Name})
-            .ToListAsync();
-
-        if (validShipmentStatuses.Count < 2)
+        var openForOffersStatusId = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Open for Offers")
+            .Select(ss => ss.Id)
+            .FirstOrDefaultAsync();
+        
+        if (openForOffersStatusId == 0)
         {
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
                 title: "Database Configuration Error",
-                detail: "Required system lookup data ('Open for Offers' or 'Offers Received' status) is missing. Please ensure the database seeder has been executed.");
+                detail: "Required system lookup data ('Open for Offers' status) is missing. Please ensure the database seeder has been executed.");
         }
+        
+        var offerReceivedStatus = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Offers Received")
+            .Select(ss => ss.Id)
+            .FirstOrDefaultAsync();
 
-        if (!validShipmentStatuses.Select(ss => ss.Id).Contains(shipment.ShipmentStatusId))
+        if (shipment.ShipmentStatusId != offerReceivedStatus && shipment.ShipmentStatusId != openForOffersStatusId)
         {
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status409Conflict,
@@ -130,9 +132,9 @@ public static class OfferEndpoints
 
         db.Offers.Add(offer);
 
-        if (shipment.ShipmentStatusId == validShipmentStatuses.Find(ss => ss.Name == "Open for Offers")!.Id)
+        if (shipment.ShipmentStatusId == openForOffersStatusId)
         {
-            shipment.ShipmentStatusId = validShipmentStatuses.Find(ss => ss.Name == "Offers Received")!.Id;
+            shipment.ShipmentStatusId = offerReceivedStatus;
         }
 
         try
