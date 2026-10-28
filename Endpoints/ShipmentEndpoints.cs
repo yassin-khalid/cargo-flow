@@ -117,7 +117,7 @@ public static class ShipmentEndpoints
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status404NotFound,
                 title: "Shipment Not Found",
-                detail: $"shipment #{id} is not exists");
+                detail: $"shipment #{id} does not exists");
         }
 
         var draftStatusId = await db.ShipmentStatuses
@@ -165,7 +165,17 @@ public static class ShipmentEndpoints
         
         shipment.ShipmentStatusId = openForOffersStatusId;
 
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Concurrency Conflict",
+                detail: $"Shipment #{id} was modified or opened for offers by another request");
+        }
 
         return TypedResults.NoContent();
 
