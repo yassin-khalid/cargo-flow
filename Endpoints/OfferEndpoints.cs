@@ -194,7 +194,7 @@ public static class OfferEndpoints
             .Select(ss => ss.Id)
             .ToListAsync();
 
-        if (validShipmentStatusIds.Count == 0)
+        if (validShipmentStatusIds.Count < 2)
         {
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
