@@ -14,6 +14,7 @@ public static class ShipmentEndpoints
         group.MapGet("/{id:int}", GetShipment)
             .WithName(EndpointRouteNames.GetShipmentByIdRoute);
         group.MapPost("/", CreateShipment);
+        group.MapPost("/{id:int}/open-for-offers", OpenForOffers);
         return group;
     }
 
@@ -104,5 +105,69 @@ public static class ShipmentEndpoints
 
 
         return TypedResults.CreatedAtRoute(value: new ShipmentDto(shipment.Id, shipment.CustomerId, shipment.PickupId, shipment.DestinationId, shipment.Weight, shipment.WeightTypeId, shipment.ShipmentStatusId), routeName: EndpointRouteNames.GetShipmentByIdRoute, routeValues: new { id = shipment.Id });
+    }
+
+
+    private static async Task<Results<NoContent, ProblemHttpResult>> OpenForOffers(int id,
+        CargoFlowDbContext db)
+    {
+        var shipment = await db.Shipments.FirstOrDefaultAsync(s => s.Id == id);
+        if (shipment is null)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Shipment Not Found",
+                detail: $"shipment #{id} is not exists");
+        }
+
+        var draftStatusId = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Draft")
+            .Select(ss => ss.Id)
+            .FirstOrDefaultAsync();
+
+        if (draftStatusId == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Draft' status) is missing. Please ensure the database seeder has been executed.");           
+        }
+        
+        var openForOffersStatusId =
+            await db.ShipmentStatuses
+                .Where(ss => ss.Name == "Open for Offers")
+                .Select(ss => ss.Id)
+                .FirstOrDefaultAsync();
+
+        if (openForOffersStatusId == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Open For Offers' status) is missing. Please ensure the database seeder has been executed.");
+        }
+
+        if (shipment.ShipmentStatusId == openForOffersStatusId)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Shipment Status Conflict",
+                detail: $"Shipment #{id} is already opened for offers");           
+        }
+        
+        if (shipment.ShipmentStatusId != draftStatusId)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Shipment Status Conflict",
+                detail: $"Shipment #{id} is not Draft, only draft shipments can be opened for offers");
+        }
+        
+        shipment.ShipmentStatusId = openForOffersStatusId;
+
+        await db.SaveChangesAsync();
+
+        return TypedResults.NoContent();
+
     }
 }
