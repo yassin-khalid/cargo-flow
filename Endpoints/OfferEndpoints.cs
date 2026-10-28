@@ -99,6 +99,14 @@ public static class OfferEndpoints
             .Select(ss => ss.Id)
             .FirstOrDefaultAsync();
 
+        if (offerReceivedStatus == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Offers Received' status) is missing. Please ensure the database seeder has been executed.");
+        }
+        
         if (shipment.ShipmentStatusId != offerReceivedStatus && shipment.ShipmentStatusId != openForOffersStatusId)
         {
             return TypedResults.Problem(
