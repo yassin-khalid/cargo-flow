@@ -379,7 +379,7 @@ public static class OfferEndpoints
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status409Conflict,
                 title: "Shipment Status Conflict Error",
-                detail: $"shipment #{shipmentId} does not have status 'Offer Received' or 'Open for Offers'");
+                detail: $"shipment #{shipmentId} does not have status 'Offers Received' or 'Open for Offers'");
         }
 
         var submittedStateId = await db.OfferStates
