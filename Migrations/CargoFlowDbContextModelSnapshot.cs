@@ -259,6 +259,12 @@ namespace CargoFlow.Migrations
                     b.Property<int>("PickupId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<int>("ShipmentStatusId")
                         .HasColumnType("int");
 

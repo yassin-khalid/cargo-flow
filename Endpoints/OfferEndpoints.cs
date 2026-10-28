@@ -280,6 +280,13 @@ public static class OfferEndpoints
                 title: "Invalid Operation",
                 detail: $"shipment #{shipmentId} already has an accepted offer, can not accept offer #{offerId}");
         }
+        catch (DbUpdateConcurrencyException)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Concurrency Conflict",
+                detail: $"Shipment #{shipmentId} was modified or awarded by another request");
+        }
 
         return TypedResults.NoContent();
     }
