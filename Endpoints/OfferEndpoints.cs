@@ -177,28 +177,6 @@ public static class OfferEndpoints
             );
         }
 
-        var openForOffersStatusId = await db.ShipmentStatuses
-            .Where(ss => ss.Name == "Open for Offers")
-            .Select(ss => ss.Id)
-            .FirstOrDefaultAsync();
-
-        if (openForOffersStatusId == 0)
-        {
-            return TypedResults.Problem(
-                statusCode: StatusCodes.Status500InternalServerError,
-                title: "Database Configuration Error",
-                detail: "Required system lookup data ('Open For Offers' status) is missing. Please ensure the database seeder has been executed.");
-        }
-
-        if (shipment.ShipmentStatusId != openForOffersStatusId)
-        {
-            return TypedResults.Problem(
-                statusCode: StatusCodes.Status409Conflict,
-                title: "Shipment Status Issue",
-                detail: $"Shipment #{shipmentId} is not open for offers"
-           );
-        }
-        
         var offer = await db.Offers
             .FirstOrDefaultAsync(o => o.Id == offerId && o.ShipmentId == shipmentId);
         if (offer is null)
@@ -208,6 +186,28 @@ public static class OfferEndpoints
                 statusCode: StatusCodes.Status404NotFound,
                 title: "Offer not found",
                 detail: $"Offer #{offerId} is either not exists or does not belong to shipment #{shipmentId}"
+            );
+        }
+
+        var validShipmentStatusIds = await db.ShipmentStatuses
+            .Where(ss => ss.Name == "Open for Offers" || ss.Name == "Offers Received")
+            .Select(ss => ss.Id)
+            .ToListAsync();
+
+        if (validShipmentStatusIds.Count == 0)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Database Configuration Error",
+                detail: "Required system lookup data ('Open For Offers' and 'Offers Received' status) is missing. Please ensure the database seeder has been executed.");
+        }
+
+        if (!validShipmentStatusIds.Contains(shipment.ShipmentStatusId))
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Shipment Status Issue",
+                detail: $"Shipment #{shipmentId} is not open for offers"
             );
         }
 
